@@ -1,0 +1,33 @@
+version: 2
+
+models:
+  - name: fct_orders
+    description: One row per order. Incremental MERGE on order_id.
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: region
+        data_tests: [not_null]
+
+  - name: fct_order_events
+    description: Append-only order lifecycle events.
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+
+  - name: fct_daily_sales
+    description: Revenue per order_date and region, excluding cancelled orders. Incremental DELETE+INSERT by date.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: [order_date, region]
+
+  - name: dim_products
+    columns:
+      - name: product_id
+        data_tests: [unique, not_null]
+
+  - name: dim_customers
+    columns:
+      - name: customer_id
+        data_tests: [unique, not_null]

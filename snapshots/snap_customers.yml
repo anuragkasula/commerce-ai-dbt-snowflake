@@ -1,0 +1,11 @@
+# SNAPSHOT = SCD Type 2 history. Each run compares the source to the snapshot table:
+# a changed row gets its old version closed (dbt_valid_to set) and a new version inserted.
+# strategy: timestamp -> "changed" means updated_at is newer than what we stored.
+snapshots:
+  - name: snap_customers
+    relation: ref('stg_commerce__customers')
+    config:
+      schema: snapshots
+      unique_key: customer_id
+      strategy: timestamp
+      updated_at: updated_at
