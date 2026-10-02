@@ -1,0 +1,15 @@
+# Copy to profiles.yml in this folder (it is gitignored) and adjust the key path.
+# dbt looks for profiles.yml in the current project folder first, then ~/.dbt/.
+commerce_ai:
+  target: dev
+  outputs:
+    dev:
+      type: snowflake
+      account: VMDMRKA-MGB56872          # ORGNAME-ACCOUNTNAME
+      user: ANURAGKASULA10
+      private_key_path: "/full/path/to/snowflake_dbt_key.p8"   # key-pair auth: no password, no MFA prompt
+      role: TRANSFORMER
+      warehouse: COMMERCE_WH
+      database: COMMERCE_AI
+      schema: DBT_ANURAG                 # your personal dev schema prefix
+      threads: 4

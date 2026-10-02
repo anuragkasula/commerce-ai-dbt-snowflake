@@ -1,0 +1,23 @@
+name: commerce_ai
+version: "1.0.0"
+profile: commerce_ai          # must match the top-level key in profiles.yml
+
+model-paths: ["models"]
+macro-paths: ["macros"]
+snapshot-paths: ["snapshots"]
+test-paths: ["tests"]
+clean-targets: ["target", "dbt_packages"]
+
+# Default materialization per folder. A model can override with {{ config(...) }}.
+# CONCEPT: config cascades: dbt_project.yml < folder < the model file itself.
+models:
+  commerce_ai:
+    staging:
+      +materialized: view          # cheap, always fresh; 1:1 with sources
+      +schema: staging
+    intermediate:
+      +materialized: ephemeral     # inlined as CTEs; never built in Snowflake
+      +schema: intermediate
+    marts:
+      +materialized: table
+      +schema: marts

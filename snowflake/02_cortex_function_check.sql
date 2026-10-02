@@ -40,6 +40,26 @@ select ai_summarize_agg(note) as result
 from (select column1 as note from values
       ('Shipment late again'), ('Invoice charged twice'), ('Delivery slipped a third time'));
 
+-- =====================================================================
+-- RESULT ON THIS TRIAL ACCOUNT (2026-10-02): A-F and every SNOWFLAKE.CORTEX.*
+-- per-row function return "not available for trial accounts". Only the
+-- aggregate functions G (AI_AGG) and H (AI_SUMMARIZE_AGG) work.
+--
+-- WORKAROUND: GROUP BY a unique key so each group holds ONE row; AI_AGG then
+-- applies the instruction to that single row, acting like a per-row LLM call.
+-- Output is free text, so the dbt models validate it (TRY_PARSE_JSON,
+-- accepted_values) instead of trusting it. Production code would use
+-- AI_CLASSIFY / AI_EXTRACT, which return structured output and cost less.
+-- =====================================================================
+select case_id,
+       ai_agg(note, 'Classify this support note into exactly one of: shipping delay, pricing or billing, licensing, product defect, installation help. Reply with the label only, lowercase, no punctuation.') as issue_type,
+       ai_agg(note, 'Return only JSON with keys order_id and product. Use null if not mentioned. No other text.') as extracted
+from (select column1 as case_id, column2 as note from values
+      ('CASE-1', 'Order ORD-10479 for the EdgeSwitch 24 is three weeks late and tracking has not updated'),
+      ('CASE-2', 'Customer was invoiced twice for the ShieldWall 200 and wants a refund'),
+      ('CASE-3', 'El pedido ORD-10233 llego con la fuente de alimentacion danada'))
+group by case_id;
+
 -- If a function errors with a model/region message (not a trial message), as ACCOUNTADMIN:
 --   alter account set cortex_enabled_cross_region = 'ANY_REGION';
 -- Governance note: that is a DATA RESIDENCY decision, not just a switch.

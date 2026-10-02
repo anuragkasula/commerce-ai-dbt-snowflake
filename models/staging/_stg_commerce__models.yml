@@ -1,0 +1,64 @@
+version: 2
+
+# CONCEPT: generic data tests. Each becomes a SELECT that returns failing rows;
+# zero rows = pass. `dbt build` runs a model, then its tests, before building
+# anything downstream, so bad data stops at the layer where it appears.
+models:
+  - name: stg_commerce__customers
+    columns:
+      - name: customer_id
+        data_tests: [unique, not_null]
+      - name: region
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['AMER', 'EMEA', 'APJ']
+
+  - name: stg_commerce__products
+    columns:
+      - name: product_id
+        data_tests: [unique, not_null]
+
+  - name: stg_commerce__orders
+    columns:
+      - name: order_id
+        data_tests: [unique, not_null]
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['BOOKED', 'SHIPPED', 'DELIVERED', 'CANCELLED']
+      - name: customer_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_commerce__customers')
+                field: customer_id
+
+  - name: stg_commerce__order_lines
+    columns:
+      - name: order_line_id
+        data_tests: [unique, not_null]
+      - name: order_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_commerce__orders')
+                field: order_id
+
+  - name: stg_commerce__order_events
+    columns:
+      - name: event_id
+        data_tests: [unique, not_null]
+
+  - name: stg_commerce__support_cases
+    columns:
+      - name: case_id
+        data_tests: [unique, not_null]
+      - name: notes
+        data_tests: [not_null]
+
+  - name: stg_commerce__case_labels
+    columns:
+      - name: case_id
+        data_tests: [unique, not_null]
