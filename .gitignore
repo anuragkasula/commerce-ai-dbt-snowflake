@@ -1,0 +1,14 @@
+# Python / local env
+.venv/
+__pycache__/
+# Generated data (reproducible: python scripts/generate_data.py)
+data/
+# dbt artifacts
+target/
+dbt_packages/
+logs/
+# Secrets: never commit
+profiles.yml
+*.p8
+*.pem
+.env
